@@ -1,0 +1,2 @@
+The raw data is exported from the LA open data website ( https://data.lacity.org/dataset/311-Call-Center-Tracking-Data/vmc3-stgb ).
+Totally there are 3,565,447 rows. Basic 311 call tracking information including date and time of call, type of information requested, how the request was handled, and which departments were notified.
