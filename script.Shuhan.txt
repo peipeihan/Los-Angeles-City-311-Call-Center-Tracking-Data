@@ -1,0 +1,130 @@
+###Number of Request on Each Department
+ggplot(data=Department, aes(x= reorder(Department,-countDP),
+                            y=countDP))+ 
+  geom_bar(stat='identity',fill=brewer.pal(9,"PuBuGn")[c(9:3)]) +
+  xlab("Department")+
+  ylab("Number of Request")+
+  ggtitle("Distribution of Requests Across Departments")+
+  geom_text(aes(label=countDP,vjust=-0.2))+
+  theme(axis.title.x=element_text(size=18,face="bold",family="Times"),
+        axis.title.y=element_text(size=18,face="bold",family="Times"),
+        axis.text=element_text(family="Times",size=14),
+        legend.title=element_text(color="#3690c0",size=16,family="Times"),
+        plot.title=element_text(size=22,lineheight=0.8,
+                                face="bold", 
+                                margin=margin(10,0,10,0),
+                                family = "Times"))
+
+
+###request type and each department referred to
+RequestType=SR%>%
+  select(RequestType, Department)%>%
+  filter(Department%in%c("BOE","BOS","BSL","BSS","ITA",
+                         "LADWP","OCB"))%>%
+  group_by(RequestType,Department)%>%
+  mutate(countRT=n())%>%
+  arrange(-countRT)
+
+RequestType=unique(RequestType)
+View(RequestType)
+
+ggplot(data=RequestType, aes(x= reorder(RequestType,countRT),y=countRT,
+                             fill=Department))+ 
+  geom_bar(stat='identity') +coord_flip()+
+  xlab("RequestType")+
+  ylab("Count")+
+  ggtitle("Request Type and Each Department Refered to")+
+    theme(axis.title.x=element_text(size=18,face="bold",family="Times"),
+          axis.title.y=element_text(size=18,face="bold",family="Times"),
+          axis.text=element_text(family="Times",size=14),
+          legend.title=element_text(color="#3690c0",face="bold",size=16,family="Times"),
+          legend.text=element_text(family="Times",size=12),
+          plot.title=element_text(size=22,lineheight=0.8,
+                                  face="bold", 
+                                  margin=margin(10,0,10,0),
+                                  family = "Times"))
+  
+
+
+
+####time series analysis of the trend of request type
+
+haha2=SR%>%
+  select(YearMonth,RequestType)%>%
+  group_by(YearMonth,RequestType)%>%
+  mutate(count=n())%>%
+  arrange(YearMonth,RequestType)%>%
+  mutate(YearMonth1=as.Date(YearMonth))
+
+haha2=unique(haha2)
+
+
+ggplot(haha2,aes(x=YearMonth1,y=count,fill=RequestType))+
+  geom_area()+
+  guides(fill=guide_legend(reverse = TRUE))+
+  scale_x_date()+
+  ggtitle(" Distribution of Request Type Over Time")+
+  xlab("")+
+  theme(axis.title.x=element_text(size=18,face="bold",family="Times"),
+        axis.title.y=element_text(size=18,face="bold",family="Times"),
+        axis.text=element_text(family="Times",size=14),
+       legend.title=element_text(color="#3690c0",face="bold",size=16,family="Times"),
+        legend.text=element_text(family="Times",size=12),
+         plot.title=element_text(size=22,lineheight=0.8,
+                                face="bold", 
+                                margin=margin(10,0,10,0),
+                                family = "Times"))
+
+
+### Request Type trend on Mobile / App across Time
+
+haha=SR%>%
+  select(YearMonth,RequestType,RequestSource)%>%
+  filter(RequestSource %in% c("Call","Mobile App"))%>%
+  group_by(YearMonth,RequestSource,RequestType)%>%
+  mutate(count=n())%>%
+  arrange(YearMonth,RequestSource,RequestType)%>%
+  mutate(YearMonth1=as.Date(YearMonth))
+  
+haha=unique(haha)
+View(haha)
+
+ggplot(haha,aes(x=YearMonth1,y=count,fill=RequestType))+
+  geom_area()+
+  guides(fill=guide_legend(reverse = TRUE))+
+  scale_x_date(n=16)+
+  ggtitle(" Distribution Across Time : Call VS. Mobile App")+
+  facet_wrap(~RequestSource,ncol=1)+
+  theme(axis.title.x=element_text(size=18,face="bold",family="Times"),
+        axis.title.y=element_text(size=18,face="bold",family="Times"),
+        axis.text=element_text(family="Times",size=14),
+        legend.title=element_text(color="#3690c0",face="bold",size=16,family="Times"),
+        legend.text=element_text(family="Times",size=12),
+        plot.title=element_text(size=22,lineheight=0.8,
+                                face="bold", 
+                                margin=margin(10,0,10,0),
+                                family = "Times"))
+
+#### Geographical Breakdown of Top 5 Request Type
+
+LAMap <- qmap("Los Angeles", zoom = 14, color = "bw")
+LAMap+
+  geom_point(data=SR%>%
+             filter(RequestType%in%
+                      c("Bulky Items",
+                        "Graffiti Removal",
+                        "Metal/Household Appliances",
+                        "Illegal Dumping Pickup",
+                        "Electronic Waste")),
+             aes(x=Longitude,y=Latitude,
+                         color= RequestType))+
+  ggtitle("Geographical Distribution of Top 5 Request Types")+
+  theme(axis.title.x=element_text(size=18,face="bold",family="Times"),
+        axis.title.y=element_text(size=18,face="bold",family="Times"),
+        axis.text=element_text(family="Times",size=14),
+        legend.title=element_text(color="#3690c0",face="bold",size=16,family="Times"),
+        legend.text=element_text(family="Times",size=12),
+        plot.title=element_text(size=22,lineheight=0.8,
+                                face="bold", 
+                                margin=margin(10,0,10,0),
+                                family = "Times"))
